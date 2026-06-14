@@ -7,6 +7,36 @@ import type { ChatMessage } from "@/lib/types";
 const G = "#c9a96e";
 
 declare global {
+  interface SpeechRecognitionAlternative {
+    transcript: string;
+    confidence: number;
+  }
+  interface SpeechRecognitionResult {
+    isFinal: boolean;
+    length: number;
+    [index: number]: SpeechRecognitionAlternative;
+  }
+  interface SpeechRecognitionResultList {
+    length: number;
+    [index: number]: SpeechRecognitionResult;
+  }
+  interface SpeechRecognitionEvent extends Event {
+    resultIndex: number;
+    results: SpeechRecognitionResultList;
+  }
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+  }
+  interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start(): void;
+    stop(): void;
+    onresult: ((event: SpeechRecognitionEvent) => void) | null;
+    onend: (() => void) | null;
+    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  }
   interface Window {
     SpeechRecognition: new () => SpeechRecognition;
     webkitSpeechRecognition: new () => SpeechRecognition;
