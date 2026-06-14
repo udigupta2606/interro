@@ -6,42 +6,9 @@ import type { ChatMessage } from "@/lib/types";
 
 const G = "#c9a96e";
 
-declare global {
-  interface SpeechRecognitionAlternative {
-    transcript: string;
-    confidence: number;
-  }
-  interface SpeechRecognitionResult {
-    isFinal: boolean;
-    length: number;
-    [index: number]: SpeechRecognitionAlternative;
-  }
-  interface SpeechRecognitionResultList {
-    length: number;
-    [index: number]: SpeechRecognitionResult;
-  }
-  interface SpeechRecognitionEvent extends Event {
-    resultIndex: number;
-    results: SpeechRecognitionResultList;
-  }
-  interface SpeechRecognitionErrorEvent extends Event {
-    error: string;
-  }
-  interface SpeechRecognition extends EventTarget {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    start(): void;
-    stop(): void;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    onend: (() => void) | null;
-    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-  }
-  interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
-  }
-}
+// Use any to avoid conflicts with partial DOM lib definitions across TS versions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SR = any;
 
 function InterviewContent() {
   const params = useSearchParams();
@@ -60,7 +27,7 @@ function InterviewContent() {
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SR>(null);
   const finalTranscriptRef = useRef("");
   const sendingRef = useRef(false);
 
@@ -124,7 +91,7 @@ function InterviewContent() {
     recognitionRef.current = rec;
     finalTranscriptRef.current = "";
 
-    rec.onresult = (event: SpeechRecognitionEvent) => {
+    rec.onresult = (event: SR) => {
       let interim = "";
       let final = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
